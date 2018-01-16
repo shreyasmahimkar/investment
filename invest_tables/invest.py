@@ -4,6 +4,7 @@ app = Flask(__name__)
 import json
 import urllib3
 from datetime import datetime
+from forex_python.converter import CurrencyRates
 
 
 @app.route("/tables")
@@ -11,6 +12,7 @@ def show_tables():
     # ------- Get Todays Date
     i = datetime.now()
     now = i.strftime('%Y-%m-%d ')
+    c = CurrencyRates()
 
     data = pd.read_excel('data.xlsx')
     cryptocurrency_temp = data.loc[data.Type == 'Cryptocurrency']
@@ -30,15 +32,26 @@ def show_tables():
     cryptocurrency_ico = cryptocurrency_temp[~cryptocurrency_temp.Name.isin(cryptocurrency_popular.Name.unique())]
     cryptocurrency_ico.Maturity_Date = 'TBD'
     cryptocurrency_final = pd.concat([cryptocurrency_popular,cryptocurrency_ico])
-    new_data = pd.concat([cryptocurrency_final,data.loc[data.Type == 'Deposit']])
+
+    deposit_temp = data.loc[data.Type == 'Deposit']
+    deposit_temp.Currency = 'USD'
+    deposit_temp.Money_Invested = deposit_temp.Money_Invested / c.get_rate('USD', 'INR')
+    deposit_temp.Todays_Value = deposit_temp.Todays_Value / c.get_rate('USD', 'INR')
+
+
+
+    new_data = pd.concat([cryptocurrency_final,deposit_temp])
 
     new_data.set_index(['Name'], inplace=True)
     new_data.index.name=None
     cryptocurrency = new_data.loc[new_data.Type == 'Cryptocurrency']
     deposit = new_data.loc[new_data.Type == 'Deposit']
-    return render_template('view.html', tables=[cryptocurrency.to_html(classes='Cryptocurrency'),
+
+    total = new_data.groupby('Currency').agg({'Money_Invested': 'sum', 'Todays_Value': 'sum'}).reset_index()
+    return render_template('view.html', tables=[total.to_html(classes='Total'),
+                                                cryptocurrency.to_html(classes='Cryptocurrency'),
                                                 deposit.to_html(classes='Deposit')],
-                           titles=['na', 'Cryptocurrencies', 'Deposits'])
+                           titles=['na', 'Total' ,'Cryptocurrencies', 'Deposits'])
 
 if __name__ == "__main__":
     app.run(debug=True)
