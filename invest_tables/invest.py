@@ -5,6 +5,7 @@ import json
 import urllib3
 from datetime import datetime
 from forex_python.converter import CurrencyRates
+import quandl
 
 i = datetime.now()
 now = i.strftime('%Y-%m-%d ')
@@ -86,7 +87,18 @@ def show_tables():
     lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 100.0)
     lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 5.61) / 1200.0) * 0
 
-    new_data = pd.concat([cryptocurrency_final,deposit_temp,acorns_data,fundrise_data,lendingClub_data])
+    #Stocks
+    stock_df = data.loc[data.Type == 'Stock']
+    stock_name_list = list(stock_df.Name.unique())
+    stock_df.set_index(['Name'], inplace=True)
+    for stock in stock_name_list:
+        one_stock = quandl.get("WIKI/" + str(stock), rows=1).reset_index()
+        units = stock_df[stock_df.index == stock].Units.values[0]
+        stock_df.at[stock, 'Todays_Value'] = one_stock.Open.values[0] * units
+    stock_df.reset_index(inplace=True)
+
+
+    new_data = pd.concat([cryptocurrency_final,deposit_temp,acorns_data,fundrise_data,lendingClub_data,stock_df])
 
     new_data.set_index(['Name'], inplace=True)
     new_data.index.name=None
@@ -95,6 +107,7 @@ def show_tables():
     acorns = new_data.loc[new_data.Type == 'Acorns']
     fundrise = new_data.loc[new_data.Type == 'Fundrise']
     lendingClub = new_data.loc[new_data.Type == 'LendingClub']
+    stocks = new_data.loc[new_data.Type == 'Stock']
 
     total = new_data.groupby('Currency').agg({'Money_Invested': 'sum', 'Todays_Value': 'sum'}).reset_index()
     total = total[['Currency', 'Money_Invested', 'Todays_Value']]
@@ -103,8 +116,9 @@ def show_tables():
                                                 deposit.to_html(classes='Deposit'),
                                                 acorns.to_html(classes='Acorns'),
                                                 fundrise.to_html(classes='Fundrise'),
-                                                lendingClub.to_html(classes='LendingClub')],
-                           titles=['na', 'Total' ,'Cryptocurrencies', 'Deposits','Acorns','Fundrise','LendingClub'])
+                                                lendingClub.to_html(classes='LendingClub'),
+                                                stocks.to_html(classes='Stock')],
+                           titles=['na', 'Total' ,'Cryptocurrencies', 'Deposits','Acorns','Fundrise','LendingClub','Stock'])
 
 if __name__ == "__main__":
     #app.run(debug=True,host='0.0.0.0')
