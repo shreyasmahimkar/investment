@@ -85,7 +85,7 @@ def show_tables():
     lendingClub_data = data.loc[data.Type == 'LendingClub']
     mif = get_monthly_investment_factor(lendingClub_data.Date_of_Investment.values[0])
     lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 100.0)
-    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 5.61) / 1200.0) * 0
+    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 5.61) / 1200.0)
 
     #Stocks
     stock_df = data.loc[data.Type == 'Stock']
