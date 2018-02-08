@@ -72,7 +72,7 @@ def show_tables():
     acorns_data = data.loc[data.Type == 'Acorns']
     mif = get_monthly_investment_factor(acorns_data.Date_of_Investment.values[0])
     acorns_data.Money_Invested = acorns_data.Money_Invested + (mif * 100.0)
-    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * 3) / 100.0
+    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * -3) / 100.0
     acorns_data.Maturity_Date = now
 
     #Fundrise Investment
@@ -85,7 +85,7 @@ def show_tables():
     lendingClub_data = data.loc[data.Type == 'LendingClub']
     mif = get_monthly_investment_factor(lendingClub_data.Date_of_Investment.values[0])
     lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 100.0)
-    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 5.61) / 1200.0)
+    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 9.0) / 1200.0)
 
     #Stocks
     stock_df = data.loc[data.Type == 'Stock']
