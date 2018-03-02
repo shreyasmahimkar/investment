@@ -71,8 +71,8 @@ def show_tables():
     #Acorns Investment
     acorns_data = data.loc[data.Type == 'Acorns']
     mif = get_monthly_investment_factor(acorns_data.Date_of_Investment.values[0])
-    acorns_data.Money_Invested = acorns_data.Money_Invested + (mif * 100.0)
-    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * -3) / 100.0
+    acorns_data.Money_Invested = acorns_data.Money_Invested + (mif * 25)
+    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * -4) / 100.0
     acorns_data.Maturity_Date = now
 
     #Fundrise Investment
@@ -84,7 +84,7 @@ def show_tables():
     #LendingClub Investment
     lendingClub_data = data.loc[data.Type == 'LendingClub']
     mif = get_monthly_investment_factor(lendingClub_data.Date_of_Investment.values[0])
-    lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 100.0)
+    lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 175)
     lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 9.0) / 1200.0)
 
     #Stocks
@@ -92,7 +92,7 @@ def show_tables():
     stock_name_list = list(stock_df.Name.unique())
     stock_df.set_index(['Name'], inplace=True)
     for stock in stock_name_list:
-        one_stock = quandl.get("WIKI/" + str(stock), rows=1).reset_index()
+        one_stock = quandl.get("WIKI/" + str(stock), rows=1, authtoken = 'UyvCy6ZdWWhmSAyfjEJr').reset_index()
         units = stock_df[stock_df.index == stock].Units.values[0]
         stock_df.at[stock, 'Todays_Value'] = one_stock.Open.values[0] * units
     stock_df.reset_index(inplace=True)
@@ -121,5 +121,5 @@ def show_tables():
                            titles=['na', 'Total' ,'Cryptocurrencies', 'Deposits','Acorns','Fundrise','LendingClub','Stock'])
 
 if __name__ == "__main__":
-    #app.run(debug=True,host='0.0.0.0')
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
+    #app.run(debug=True)
