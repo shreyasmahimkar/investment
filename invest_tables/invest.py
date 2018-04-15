@@ -21,8 +21,14 @@ def get_cryptocurrency(df):
     ## Get todays Value of cryptocurrencies
     http = urllib3.PoolManager()
     r = http.request('GET', 'https://api.coinmarketcap.com/v1/ticker/')
+    cr_link = http.request('GET', 'https://api.coinmarketcap.com/v1/ticker/crypterium/')
+    loci_link = http.request('GET', 'https://api.coinmarketcap.com/v1/ticker/locicoin/')
+    cr_df = pd.concat([pd.DataFrame(json.loads(cr_link.data.decode('utf-8'))),
+                       pd.DataFrame(json.loads(loci_link.data.decode('utf-8')))])
+
     all_data = json.loads(r.data.decode('utf-8'))
-    all_data_df = pd.DataFrame(all_data)
+    all_data_df = pd.concat([pd.DataFrame(all_data),
+                             cr_df])
 
     cryptocurrency_popular = cryptocurrency_temp.merge(all_data_df[['id', 'price_usd']], left_on='Name', right_on='id',
                                                        how='inner')
@@ -71,8 +77,8 @@ def show_tables():
     #Acorns Investment
     acorns_data = data.loc[data.Type == 'Acorns']
     mif = get_monthly_investment_factor(acorns_data.Date_of_Investment.values[0])
-    acorns_data.Money_Invested = acorns_data.Money_Invested + (mif * 25)
-    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * -4) / 100.0
+    acorns_data.Money_Invested = acorns_data.Money_Invested + (mif * 40)
+    acorns_data.Todays_Value = acorns_data.Money_Invested + (acorns_data.Money_Invested * -1.5) / 100.0
     acorns_data.Maturity_Date = now
 
     #Fundrise Investment
@@ -85,7 +91,7 @@ def show_tables():
     lendingClub_data = data.loc[data.Type == 'LendingClub']
     mif = get_monthly_investment_factor(lendingClub_data.Date_of_Investment.values[0])
     lendingClub_data.Money_Invested = lendingClub_data.Money_Invested + (mif * 175)
-    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 9.0) / 1200.0)
+    lendingClub_data.Todays_Value = lendingClub_data.Money_Invested + ((lendingClub_data.Money_Invested * 7.0) / 1200.0)
 
     #Stocks
     stock_df = data.loc[data.Type == 'Stock']
