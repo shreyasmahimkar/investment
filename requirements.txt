@@ -53,6 +53,6 @@ urllib3==1.22
 wcwidth==0.1.7
 webencodings==0.5.1
 Werkzeug==0.14.1
-wheel==0.30.0
+wheel==0.38.1
 widgetsnbextension==3.1.0
 xlrd==1.1.0
